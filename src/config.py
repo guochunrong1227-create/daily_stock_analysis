@@ -18,7 +18,9 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 from urllib.parse import urlparse
 from dotenv import load_dotenv, dotenv_values
 from dataclasses import dataclass, field
+import logging
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ConfigIssue:
@@ -456,6 +458,8 @@ class Config:
             _single_deepseek = os.getenv('DEEPSEEK_API_KEY', '').strip()
             if _single_deepseek:
                 deepseek_api_keys = [_single_deepseek]
+
+        # logger.info(f"deepseek_api_keys: {deepseek_api_keys}")
 
         # LITELLM_MODEL: explicit config takes precedence; else infer from available keys
         litellm_model = os.getenv('LITELLM_MODEL', '').strip()

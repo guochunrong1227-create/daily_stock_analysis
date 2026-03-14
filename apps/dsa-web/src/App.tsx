@@ -12,6 +12,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useAgentChatStore } from './stores/agentChatStore';
 import './App.css';
 
+import StrategyPage from  './pages/StrategyPage';
+import StockQueryPage from './pages/StockQueryPage';
+
 // 侧边导航图标
 const HomeIcon: React.FC<{ active?: boolean }> = ({active}) => (
     <svg className="w-6 h-6" fill={active ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -49,6 +52,28 @@ const LogoutIcon: React.FC = () => (
     </svg>
 );
 
+const StrategyIcon: React.FC<{ active?: boolean }> = ({ active }) => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={active ? 2 : 1.5}
+            d="M12 3v3m6.364-1.636l-2.121 2.121M21 12h-3m1.636 6.364l-2.121-2.121M12 21v-3m-6.364 1.636l2.121-2.121M3 12h3m-1.636-6.364l2.121 2.121M12 9v6m3-3H9"
+        />
+    </svg>
+);
+
+const StockQueryIcon: React.FC<{ active?: boolean }> = ({ active }) => (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={active ? 2 : 1.5}
+            d="M12 4 A6 6 0 1 1 12 16 A6 6 0 1 1 12 4 M17 15 L22 20 M8 12 L11 8 L14 11 L17 7"
+        />
+    </svg>
+);
+
 type DockItem = {
     key: string;
     label: string;
@@ -76,6 +101,18 @@ const NAV_ITEMS: DockItem[] = [
         icon: BacktestIcon,
     },
     {
+        key: 'strategy',
+        label: '策略回测',
+        to: '/strategy',
+        icon: StrategyIcon,
+    },
+    {
+        key: 'stockquery',
+        label: '',
+        to: '/stockquery',
+        icon: StockQueryIcon,
+    },
+    {
         key: 'settings',
         label: '设置',
         to: '/settings',
@@ -90,13 +127,18 @@ const DockNav: React.FC = () => {
     return (
         <aside className="dock-nav" aria-label="主导航">
             <div className="dock-surface">
-                <NavLink to="/" className="dock-logo" title="首页" aria-label="首页">
+                {/* <NavLink to="/" className="dock-logo" title="首页" aria-label="首页">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </NavLink> */}
+                <NavLink to="https://pro.openbb.co/" className="dock-logo" title="外部跳转" aria-label="外部跳转" style={{ backgroundColor: 'yellow' }} >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                               d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                     </svg>
                 </NavLink>
-
                 <nav className="dock-items" aria-label="页面">
                     {NAV_ITEMS.map((item) => {
                         const Icon = item.icon;
@@ -207,6 +249,8 @@ const AppContent: React.FC = () => {
                     <Route path="/" element={<HomePage/>}/>
                     <Route path="/chat" element={<ChatPage/>}/>
                     <Route path="/backtest" element={<BacktestPage/>}/>
+                    <Route path="/strategy" element={<StrategyPage/>}/>
+                    <Route path="/stockquery" element={<StockQueryPage/>}/>
                     <Route path="/settings" element={<SettingsPage/>}/>
                     <Route path="/login" element={<LoginPage/>}/>
                     <Route path="*" element={<NotFoundPage/>}/>

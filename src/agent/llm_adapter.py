@@ -216,6 +216,9 @@ class LLMToolAdapter:
         models_to_try = [config.litellm_model] + (config.litellm_fallback_models or [])
         models_to_try = [m for m in models_to_try if m]
 
+
+        # logger.info(f"models_to_try: {models_to_try}")
+
         last_error = None
         for model in models_to_try:
             try:
@@ -265,9 +268,12 @@ class LLMToolAdapter:
         else:
             # Legacy path: direct call for fallback/other models
             keys = get_api_keys_for_model(model, self._config)
+            # logger.info(f"keys: {keys}")
             if keys:
                 call_kwargs["api_key"] = keys[0]
+            # logger.info(f"call_kwargs:{call_kwargs}")
             call_kwargs.update(extra_litellm_params(model, self._config))
+            # logger.info(f"call_kwargs update:{call_kwargs}")
             response = litellm.completion(**call_kwargs)
 
         return self._parse_litellm_response(response, model)

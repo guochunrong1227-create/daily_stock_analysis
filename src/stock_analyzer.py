@@ -615,9 +615,6 @@ class StockTrendAnalyzer:
             risks.append(f"⚠️ {result.trend_status.value}，不宜做多")
 
         # === 乖离率评分（20分，强势趋势补偿）===
-        bias = result.bias_ma5
-        if bias != bias or bias is None:  # NaN or None defense
-            bias = 0.0
         base_threshold = get_config().bias_threshold
 
         # Strong trend compensation: relax threshold for STRONG_BULL with high strength
@@ -629,38 +626,63 @@ class StockTrendAnalyzer:
             effective_threshold = base_threshold
             is_strong_trend = False
 
-        if bias < 0:
-            # Price below MA5 (pullback)
-            if bias > -3:
-                score += 20
-                reasons.append(f"✅ 价格略低于MA5({bias:.1f}%)，回踩买点")
-            elif bias > -5:
-                score += 16
-                reasons.append(f"✅ 价格回踩MA5({bias:.1f}%)，观察支撑")
-            else:
-                score += 8
-                risks.append(f"⚠️ 乖离率过大({bias:.1f}%)，可能破位")
-        elif bias < 2:
-            score += 18
-            reasons.append(f"✅ 价格贴近MA5({bias:.1f}%)，介入好时机")
-        elif bias < base_threshold:
-            score += 14
-            reasons.append(f"⚡ 价格略高于MA5({bias:.1f}%)，可小仓介入")
-        elif bias > effective_threshold:
-            score += 4
-            risks.append(
-                f"❌ 乖离率过高({bias:.1f}%>{effective_threshold:.1f}%)，严禁追高！"
-            )
-        elif bias > base_threshold and is_strong_trend:
-            score += 10
-            reasons.append(
-                f"⚡ 强势趋势中乖离率偏高({bias:.1f}%)，可轻仓追踪"
-            )
+        bias5 = result.bias_ma5
+        bias10 = result.bias_ma10
+        bias20 = result.bias_ma20
+        # if bias != bias or bias is None:  # NaN or None defense
+        #     bias = 0.0
+
+        if bias5 < effective_threshold*(-1):
+            score += 20
+            reasons.append(f"✅ 低于MA5({bias5:.1f}%)，极端恐慌，短线套利机会出现，左侧试错买入点")
+        elif bias5 > effective_threshold*(-1) & bias5 < effective_threshold*(-0.5):
+            score +=15
+            reasons.append(f"✅ 低于MA5({bias5:.1f}%)，超卖区，短线反弹一触即发，不恐慌割肉，准备低吸")
+        elif bias5 > effective_threshold*(-0.5) & bias5 < effective_threshold*(0.5):
+            score +=10
+            reasons.append(f"⚡在MA5({bias5:.1f}%)附近，短线趋势不明，持股持币观望")
+        elif bias5 > effective_threshold*(0.5) & bias5 < effective_threshold*(1):
+            score +=5
+            reasons.append(f"⚠️ 高于MA5({bias5:.1f}%)，超买区，短线随时有修复回调，不追高买入，只卖不买")
+        elif bias5 > effective_threshold*(1):
+            score +=0
+            # reasons.append(f"❌ 高于MA5({bias5:.1f}%)，短线属于异常波动，风险极高，属于异常波动，风险极高")
+            risks.append(f"❌ 乖离率过高({bias5:.1f}%>{base_threshold:.1f}%)，短线严禁追高！")
         else:
-            score += 4
-            risks.append(
-                f"❌ 乖离率过高({bias:.1f}%>{base_threshold:.1f}%)，严禁追高！"
-            )
+            pass
+
+        # if bias < 0:
+        #     # Price below MA5 (pullback)
+        #     if bias > -3:
+        #         score += 20
+        #         reasons.append(f"✅ 价格略低于MA5({bias:.1f}%)，回踩买点")
+        #     elif bias > -5:
+        #         score += 16
+        #         reasons.append(f"✅ 价格回踩MA5({bias:.1f}%)，观察支撑")
+        #     else:
+        #         score += 8
+        #         risks.append(f"⚠️ 乖离率过大({bias:.1f}%)，可能破位")
+        # elif bias < 2:
+        #     score += 18
+        #     reasons.append(f"✅ 价格贴近MA5({bias:.1f}%)，介入好时机")
+        # elif bias < base_threshold:
+        #     score += 14
+        #     reasons.append(f"⚡ 价格略高于MA5({bias:.1f}%)，可小仓介入")
+        # elif bias > effective_threshold:
+        #     score += 4
+        #     risks.append(
+        #         f"❌ 乖离率过高({bias:.1f}%>{effective_threshold:.1f}%)，严禁追高！"
+        #     )
+        # elif bias > base_threshold and is_strong_trend:
+        #     score += 10
+        #     reasons.append(
+        #         f"⚡ 强势趋势中乖离率偏高({bias:.1f}%)，可轻仓追踪"
+        #     )
+        # else:
+        #     score += 4
+        #     risks.append(
+        #         f"❌ 乖离率过高({bias:.1f}%>{base_threshold:.1f}%)，严禁追高！"
+        #     )
 
         # === 量能评分（15分）===
         volume_scores = {
