@@ -23,6 +23,8 @@ from api.v1.schemas.analysis import (
 from api.v1.schemas.history import (
     HistoryItem,
     HistoryListResponse,
+    DeleteHistoryRequest,
+    DeleteHistoryResponse,
     NewsIntelItem,
     NewsIntelResponse,
     AnalysisReport,
@@ -55,6 +57,8 @@ from api.v1.schemas.system_config import (
     ValidateSystemConfigRequest,
     ConfigValidationIssue,
     ValidateSystemConfigResponse,
+    TestLLMChannelRequest,
+    TestLLMChannelResponse,
     SystemConfigValidationErrorResponse,
     SystemConfigConflictResponse,
 )
@@ -82,6 +86,8 @@ __all__ = [
     # history
     "HistoryItem",
     "HistoryListResponse",
+    "DeleteHistoryRequest",
+    "DeleteHistoryResponse",
     "NewsIntelItem",
     "NewsIntelResponse",
     "AnalysisReport",
@@ -111,6 +117,8 @@ __all__ = [
     "ValidateSystemConfigRequest",
     "ConfigValidationIssue",
     "ValidateSystemConfigResponse",
+    "TestLLMChannelRequest",
+    "TestLLMChannelResponse",
     "SystemConfigValidationErrorResponse",
     "SystemConfigConflictResponse",
     # strategy
