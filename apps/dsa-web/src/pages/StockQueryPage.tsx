@@ -46,14 +46,15 @@ const StockQueryPage: React.FC = () => {
   // --- 本地错误状态（可复用原 store 风格，此处独立管理）---
   const [error, setError] = useState<any>(null);
 
-  // --- 查询输入 ---
-  const [stockCodeInput, setStockCodeInput] = useState('');
-  const [inputError, setInputError] = useState<string>();
+  // // --- 查询输入 ---
+  // const [stockCodeInput, setStockCodeInput] = useState('');
+  // const [inputError, setInputError] = useState<string>();
 
   // --- 按钮加载状态 ---
   const [queryingFundamental, setQueryingFundamental] = useState(false);
   const [queryingSentiment, setQueryingSentiment] = useState(false);
   const [queryingCombined, setQueryingCombined] = useState(false);
+  const [combinedStrategy, setCombinedStrategy] = useState<'popularity' | 'rising' | 'breakout'>('popularity');
 
   // --- 左侧三个历史列表数据 ---
   const [fundamentalHistory, setFundamentalHistory] = useState<HistoryQueryItem[]>([]);
@@ -152,16 +153,16 @@ const StockQueryPage: React.FC = () => {
     type: 'fundamental' | 'sentiment' | 'combined',
     setLoading: (val: boolean) => void
   ) => {
-    // 简单校验股票代码（非必须）
-    if (stockCodeInput) {
-      // 可调用原项目中的 validateStockCode，这里简单只允许字母数字点
-      const isValid = /^[A-Za-z0-9.]{1,20}$/.test(stockCodeInput);
-      if (!isValid) {
-        setInputError('股票代码格式不正确');
-        return;
-      }
-    }
-    setInputError(undefined);
+    // // 简单校验股票代码（非必须）
+    // if (stockCodeInput) {
+    //   // 可调用原项目中的 validateStockCode，这里简单只允许字母数字点
+    //   const isValid = /^[A-Za-z0-9.]{1,20}$/.test(stockCodeInput);
+    //   if (!isValid) {
+    //     setInputError('股票代码格式不正确');
+    //     return;
+    //   }
+    // }
+    // setInputError(undefined);
     setLoading(true);
     setError(null);
 
@@ -169,11 +170,11 @@ const StockQueryPage: React.FC = () => {
       // --- API 调用示例 (注释保留) ---
       let response;
       if (type === 'fundamental') {
-        response = await stockqueryApi.stockquery('fundamental');
+        response = await stockqueryApi.stockquery('fundamental','');
       } else if (type === 'sentiment') {
-        response = await stockqueryApi.stockquery('sentiment');
+        response = await stockqueryApi.stockquery('sentiment','');
       } else {
-        response = await stockqueryApi.stockquery('combined');
+        response = await stockqueryApi.stockquery('combined',combinedStrategy);
         // response = await stockqueryApi.queryCombined({ stockCode: stockCodeInput || undefined });
       }
       console.log(response.createAt)
@@ -221,7 +222,7 @@ const StockQueryPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [combinedStrategy]);
 
   // --- 点击历史记录项 ---
   const handleHistoryClick = (item: HistoryQueryItem) => {
@@ -379,7 +380,7 @@ const StockQueryPage: React.FC = () => {
             </svg>
           </button>
 
-          {/* 股票代码输入 */}
+          {/* 股票代码输入
           <div className="relative flex-1 min-w-[120px]">
             <input
               type="text"
@@ -394,7 +395,7 @@ const StockQueryPage: React.FC = () => {
             {inputError && (
               <p className="absolute -bottom-4 left-0 text-xs text-danger">{inputError}</p>
             )}
-          </div>
+          </div> */}
 
           {/* 三个查询按钮 */}
           <button
@@ -421,6 +422,43 @@ const StockQueryPage: React.FC = () => {
             {queryingCombined ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
             择时综合
           </button>
+
+          {/* 新增：策略单选按钮组 */}
+          <div className="flex items-center gap-3 text-xs text-secondary ml-1">
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="combinedStrategy"
+                value="popularity"
+                checked={combinedStrategy === 'popularity'}
+                onChange={() => setCombinedStrategy('popularity')}
+                className="accent-cyan"
+              />
+              <span>人气机构</span>
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="combinedStrategy"
+                value="rising"
+                checked={combinedStrategy === 'rising'}
+                onChange={() => setCombinedStrategy('rising')}
+                className="accent-cyan"
+              />
+              <span>上升收阳</span>
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="combinedStrategy"
+                value="breakout"
+                checked={combinedStrategy === 'breakout'}
+                onChange={() => setCombinedStrategy('breakout')}
+                className="accent-cyan"
+              />
+              <span>横盘突破</span>
+            </label>
+          </div>
         </div>
       </header>
 

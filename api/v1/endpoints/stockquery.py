@@ -42,7 +42,8 @@ def run_stockQuery(
     try:
         service = StockQueryService(db_manager)
         stats = service.stock_query(
-            type = request.paramType
+            type = request.paramType,
+            strategy = request.paramStrategy
         )
         return HistoryQueryItemResponse(**stats)
     except Exception as exc:

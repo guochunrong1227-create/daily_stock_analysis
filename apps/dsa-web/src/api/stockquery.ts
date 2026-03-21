@@ -11,13 +11,16 @@ export const stockqueryApi = {
   /**
    * Trigger backtest evaluation
    */
-  stockquery: async (paramsType: string): Promise<HistoryQueryItem> => {
+  stockquery: async (paramsType: string,strategy:string): Promise<HistoryQueryItem> => {
     // const requestData: Record<string, unknown> = {};
     // requestData.type = paramsType
 
     const responseData = await apiClient.post<Record<string, unknown>>(
       '/api/v1/stockquery/run',
-      {paramType: paramsType},
+      {
+        paramType: paramsType,
+        paramStrategy:strategy,
+      },
     );
 
     // console.log(responseData.data)

@@ -33,6 +33,7 @@ from pydantic import BaseModel, Field
 
 class TypeParam(BaseModel):
     paramType: str
+    paramStrategy:str
 
 class StockRow(BaseModel):
     stockName: str 

@@ -19,7 +19,6 @@ import akshare as ak
 from datetime import datetime, timezone
 import pandas as pd
 
-
 #该类负责整理数据，并调用engine进行回测，不过目前直接在此函数中处理回测
 class StockQueryService:
     """Service layer to run and query backtests."""
@@ -29,33 +28,45 @@ class StockQueryService:
 
     def stock_query(
         self,
-        type: str
+        type: str,
+        strategy: str,
     ) -> Dict[str, Any]:
         
         data = pd.DataFrame()
         title = ""
         if type == "fundamental":
             title = "基本面"
-            stock_yjbb_em_df = ak.stock_yjbb_em(date="20251231")
-            df_ranked = stock_yjbb_em_df.sort_values(
-                by=['净资产收益率','净利润-同比增长',  '每股收益','净利润-季度环比增长'],
-                ascending=False
-            ).reset_index(drop=True)
+            file_path = './data/fundamental_stock_data.json'
+            try:
+                with open(file_path,'r',encoding='utf-8') as f:
+                    data = json.load(f)
+            except Exception:
+                pass
+            if len(data) == 0:
+                stock_yjbb_em_df = ak.stock_yjbb_em(date="20251231")
+                df_ranked = stock_yjbb_em_df.sort_values(
+                    by=['净资产收益率','净利润-同比增长',  '每股收益','净利润-季度环比增长'],
+                    ascending=False
+                ).reset_index(drop=True)
 
-            # logger.info(df_ranked.head(50)) #获取财务报表中排名前50的股票
-            columns_map ={
-                '股票代码': 'stockCode',
-                '股票简称':'stockName',
-                '最新公告日期':'date'
-                }
-        
-            result = (df_ranked.loc[~df_ranked['股票代码'].str.startswith('8')]   # 先过滤
-                .head(50)[list(columns_map.keys())]
-                .rename(columns=columns_map)
-                .assign(date=lambda x: pd.to_datetime(x['date']).dt.strftime('%Y-%m-%d'))
-                .to_dict('records')
-            )
-            data=result.copy()
+                # logger.info(df_ranked.head(50)) #获取财务报表中排名前50的股票
+                columns_map ={
+                    '股票代码': 'stockCode',
+                    '股票简称':'stockName',
+                    '最新公告日期':'date'
+                    }
+            
+                result = (df_ranked.loc[~df_ranked['股票代码'].str.startswith('8')]   # 先过滤
+                    .head(50)[list(columns_map.keys())]
+                    .rename(columns=columns_map)
+                    .assign(date=lambda x: pd.to_datetime(x['date']).dt.strftime('%Y-%m-%d'))
+                    .to_dict('records')
+                )
+                data=result.copy()
+                # 将 data 存储到本地文件
+                file_path = './data/fundamental_stock_data.json'  # 可根据需要修改路径
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
         elif type=="sentiment":
             title = "人气榜"
             comments_df = ak.stock_comment_em()
@@ -94,32 +105,40 @@ class StockQueryService:
                 .to_dict('records')
             )
             data=result.copy()
-
-            # logger.info(data)
-
         elif type == "combined":
-            title = "人气综合"
-            comments_df = ak.stock_comment_em()
-            df_sorted = comments_df.sort_values(
-                by=['综合得分', '上升','关注指数','机构参与度'],
-                ascending=False
-            ).reset_index(drop=True)
-            columns_map ={
-                '代码': 'stockCode',
-                '名称':'stockName',
-                '交易日':'date'
-                }
-            result = (df_sorted.loc[~df_sorted['代码'].str.startswith('8')]   # 先过滤
-                .head(50)[list(columns_map.keys())]
-                .rename(columns=columns_map)
-                .assign(date=lambda x: pd.to_datetime(x['date']).dt.strftime('%Y-%m-%d'))
-                .to_dict('records')
-            )
-            data=result.copy()
+            # 'popularity' | 'rising' | 'breakout'
+            if strategy == "popularity":
+                title = "人气机构"
+                comments_df = ak.stock_comment_em()
+                df_sorted = comments_df.sort_values(
+                    by=['综合得分', '上升','关注指数','机构参与度'],
+                    ascending=False
+                ).reset_index(drop=True)
+                columns_map ={
+                    '代码': 'stockCode',
+                    '名称':'stockName',
+                    '交易日':'date'
+                    }
+                result = (df_sorted.loc[~df_sorted['代码'].str.startswith('8')]   # 先过滤
+                    .head(50)[list(columns_map.keys())]
+                    .rename(columns=columns_map)
+                    .assign(date=lambda x: pd.to_datetime(x['date']).dt.strftime('%Y-%m-%d'))
+                    .to_dict('records')
+                )
+                data=result.copy()
+            elif strategy == "rising":
+                # 原始代码
+                title = "人气收阳"
+                file_path = './data/sentiment_rising_stock_data.json'  # 可根据需要修改路径
+                with open(file_path,'r',encoding='utf-8') as f:
+                    data = json.load(f)
+            elif strategy == "breakout":
+                title = "强势突破"
+                file_path = './data/breakout_stock_data.json'
+                with open(file_path,'r',encoding='utf-8') as f:
+                    data = json.load(f)
         else:
             pass
-    
-        
         now_utc = datetime.now(timezone.utc)
         iso_str = now_utc.isoformat()
         return{
