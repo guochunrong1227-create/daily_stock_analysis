@@ -41,13 +41,13 @@ class StockRow(BaseModel):
     date: str 
     # key: str = Field(..., allow_inf_nan=False)
 
-class QueryParam(BaseModel):
-    stockCode: str 
+# class QueryParam(BaseModel):
+#     stockCode: str 
 
 class HistoryQueryItemResponse(BaseModel):
     id: str 
     type: str
-    queryParam: QueryParam
+    downloadURL: str
     resultCount: str 
     createAt: str 
     data:list[StockRow]

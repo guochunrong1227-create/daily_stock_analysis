@@ -73,6 +73,7 @@ const StockQueryPage: React.FC = () => {
 
   // --- 当前选中的历史项（用于高亮和右侧展示）---
   const [selectedItem, setSelectedItem] = useState<{ type: HistoryQueryItem['type']; id: string} | null>(null);
+  const [downloadURL,setDownloadURL] = useState<string>();
 
   // --- 右侧网格数据 ---
   const [gridData, setGridData] = useState<StockRow[]>([]);
@@ -177,7 +178,7 @@ const StockQueryPage: React.FC = () => {
         response = await stockqueryApi.stockquery('combined',combinedStrategy);
         // response = await stockqueryApi.queryCombined({ stockCode: stockCodeInput || undefined });
       }
-      console.log(response.createAt)
+      console.log(response.downloadURL)
       console.log(response)
       const rows = response.data as StockRow[];
 
@@ -198,7 +199,7 @@ const StockQueryPage: React.FC = () => {
        const newItem: HistoryQueryItem = {
         id: response.id,
         type: response.type,
-        queryParams: response.queryParams,
+        downloadURL: response.downloadURL,
         resultCount: response.resultCount,
         createAt: response.createAt,
         data: rows,
@@ -216,6 +217,7 @@ const StockQueryPage: React.FC = () => {
       // 更新右侧网格数据并选中当前项
       setGridData(rows);
       setSelectedItem({ type, id: newItem.id});
+      setDownloadURL(newItem.downloadURL);
     } catch (err) {
       console.error(`${type} query failed:`, err);
       setError(getParsedApiError(err));
@@ -331,9 +333,9 @@ const StockQueryPage: React.FC = () => {
             <tbody>
               {gridData.map((row, idx) => (
                 <tr key={idx} className="border-b border-white/5 last:border-0 hover:bg-white/5">
-                  <td className="px-3 py-2 text-white">{row.stockName}</td>
-                  <td className="px-3 py-2 text-secondary font-mono">{row.stockCode}</td>
-                  <td className="px-3 py-2 text-secondary">{row.date}</td>
+                  <td className="px-3 py-2 text-left font-medium text-secondary">{row.stockName}</td>
+                  <td className="px-3 py-2 text-left font-medium text-secondary">{row.stockCode}</td>
+                  <td className="px-3 py-2 text-left font-medium text-secondary">{row.date}</td>
                 </tr>
               ))}
             </tbody>
@@ -458,6 +460,11 @@ const StockQueryPage: React.FC = () => {
               />
               <span>横盘突破</span>
             </label>
+          </div>
+          <div className="text-base text-white mt-1">
+            <a href={downloadURL} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">
+              下载
+            </a>
           </div>
         </div>
       </header>

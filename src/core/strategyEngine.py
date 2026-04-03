@@ -30,15 +30,15 @@ OVERALL_SENTINEL_CODE = "__overall__"
 # 策略十：肯特纳通道突破策略 (Keltner Channel Breakout)
 
 ############################################################
-
-# 策略一：双均线策略 (Dual Moving Average)¶
-# 核心思想： 双均线策略利用两条不同周期的移动平均线（SMA）来判断市场趋势。 
-# * 短期均线（如 5 日）：反应灵敏，紧跟价格波动。 * 长期均线（如 20 日）：反应迟钝，代表长期趋势。
-
-# 交易信号： 
-# * 金叉 (Golden Cross)：当短期均线 上穿 长期均线时，表明短期趋势走强，是 买入 信号。 
-# * 死叉 (Death Cross)：当短期均线 下穿 长期均线时，表明短期趋势走弱，是 卖出 信号。
-
+strategies={"DualSMAStrategy":"""
+    # 策略一：双均线策略 (Dual Moving Average)<br>
+    # 核心思想： 双均线策略利用两条不同周期的移动平均线（SMA）来判断市场趋势。<br>
+    # * 短期均线（如 5 日）：反应灵敏，紧跟价格波动。 * 长期均线（如 20 日）：反应迟钝，代表长期趋势。<br>
+    # 交易信号：<br>
+    # * 金叉 (Golden Cross)：当短期均线 上穿 长期均线时，表明短期趋势走强，是 买入 信号。<br> 
+    # * 死叉 (Death Cross)：当短期均线 下穿 长期均线时，表明短期趋势走弱，是 卖出 信号。<br>
+    """
+}
 
 import akquant as aq
 import pandas as pd
@@ -64,25 +64,22 @@ class DualSMAStrategy(aq.Strategy):
     def on_bar(self, bar: aq.Bar):
         short_val = self.sma_short.update(bar.close)
         long_val = self.sma_long.update(bar.close)
-
         if short_val is None or long_val is None:
             return
-
         position = self.get_position(bar.symbol)
-
         if short_val > long_val and position == 0:
             self.buy(bar.symbol, 1000)
-
         elif short_val < long_val and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略二：RSI 均值回归策略 (RSI Mean Reversion)¶
-# 核心思想： RSI (相对强弱指标) 是一种动量指标，数值范围在 0 到 100 之间，
-# 用于衡量近期价格变化的幅度。 * 均值回归 (Mean Reversion)：
-# 该策略假设价格不会一直涨或一直跌，过度偏离后会回归正常水平。 
-# * 超卖 (Oversold)：RSI 低于某个阈值（如 30），意味着近期跌幅过大，可能反弹 -> 买入。 
-# * 超买 (Overbought)：RSI 高于某个阈值（如 70），意味着近期涨幅过大，可能回调 -> 卖出。
-
+strategies["RSIStrategy"]="""
+    # 策略二：RSI 均值回归策略 (RSI Mean Reversion)<br>
+    # 核心思想： RSI (相对强弱指标) 是一种动量指标，数值范围在 0 到 100 之间，用于衡量近期价格变化的幅度。<br>
+    # * 均值回归 (Mean Reversion)：<br>
+    # 该策略假设价格不会一直涨或一直跌，过度偏离后会回归正常水平。<br> 
+    # * 超卖 (Oversold)：RSI 低于某个阈值（如 30），意味着近期跌幅过大，可能反弹 -> 买入。<br>
+    # * 超买 (Overbought)：RSI 高于某个阈值（如 70），意味着近期涨幅过大，可能回调 -> 卖出。<br>
+"""
 class RSIStrategy(aq.Strategy):
     def __init__(self, period=14, buy_threshold=30, sell_threshold=70):
         self.period = period
@@ -117,15 +114,16 @@ class RSIStrategy(aq.Strategy):
         elif current_rsi > self.sell_threshold and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略三：布林带策略 (Bollinger Bands)
-# 核心思想： 布林带由三条轨道线组成： 
-# * 中轨：N 日移动平均线。 
-# * 上轨：中轨 + K 倍标准差。 
-# * 下轨：中轨 - K 倍标准差。
-
-# 根据统计学原理，价格有很大（如 95%）的概率落在上下轨之间。 
-# * 当价格跌破下轨时，通常被视为非理性的超卖状态，价格可能会回归中轨 -> 买入。 
-# * 当价格突破上轨时，通常被视为非理性的超买状态，价格可能会回调 -> 卖出。
+strategies["BollingerStrategy"]="""
+    # 策略三：布林带策略 (Bollinger Bands)<br>
+    # 核心思想： 布林带由三条轨道线组成： <br>
+    # * 中轨：N 日移动平均线。 <br>
+    # * 上轨：中轨 + K 倍标准差。<br>
+    # * 下轨：中轨 - K 倍标准差。<br>
+    # 根据统计学原理，价格有很大（如 95%）的概率落在上下轨之间。 <br>
+    # * 当价格跌破下轨时，通常被视为非理性的超卖状态，价格可能会回归中轨 -> 买入。<br> 
+    # * 当价格突破上轨时，通常被视为非理性的超买状态，价格可能会回调 -> 卖出。
+"""
 
 class BollingerStrategy(aq.Strategy):
     def __init__(self, window=20, num_std=2):
@@ -153,12 +151,13 @@ class BollingerStrategy(aq.Strategy):
         elif current_price > upper_band and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略四：唐奇安通道突破策略 (Donchian Channel Breakout)
-# 核心思想：唐奇安通道由过去N日的最高价和最低价构成。
-# * 当价格突破过去N日最高价时，视为向上突破，可能开启上升趋势 -> 买入。
-# * 当价格跌破过去N日最低价时，视为向下突破，可能开启下降趋势 -> 卖出（平多）。
+strategies["DonchianBreakoutStrategy"]="""
+# 策略四：唐奇安通道突破策略 (Donchian Channel Breakout)<br>
+# 核心思想：唐奇安通道由过去N日的最高价和最低价构成。<br>
+# * 当价格突破过去N日最高价时，视为向上突破，可能开启上升趋势 -> 买入。<br>
+# * 当价格跌破过去N日最低价时，视为向下突破，可能开启下降趋势 -> 卖出（平多）。<br>
 # 此策略是海龟交易法则的基础，通常结合ATR动态调整仓位，这里简化处理。
-
+"""
 class DonchianBreakoutStrategy(aq.Strategy):
     def __init__(self, window=20):
         self.window = window
@@ -186,12 +185,13 @@ class DonchianBreakoutStrategy(aq.Strategy):
         elif current_price < channel_low and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略五：布林带+RSI过滤策略 (Bollinger Bands with RSI Filter)
-# 核心思想：结合布林带的均值回归特性和RSI的动量过滤，减少假突破。
-# * 布林带下轨提供潜在买入区，但仅当RSI也处于超卖（<30）时确认，提高信号可靠性。
-# * 布林带上轨提供潜在卖出区，但仅当RSI处于超买（>70）时确认，避免在强趋势中过早反向开仓。
+strategies["BollingerRSIStrategy"]="""
+# 策略五：布林带+RSI过滤策略 (Bollinger Bands with RSI Filter)<br>
+# 核心思想：结合布林带的均值回归特性和RSI的动量过滤，减少假突破。<br>
+# * 布林带下轨提供潜在买入区，但仅当RSI也处于超卖（<30）时确认，提高信号可靠性。<br>
+# * 布林带上轨提供潜在卖出区，但仅当RSI处于超买（>70）时确认，避免在强趋势中过早反向开仓。<br>
 # * 当持仓时，若价格回归中轨或RSI脱离极端区，可考虑平仓（此处简化：触及上/下轨反向信号平仓）。
-
+"""
 class BollingerRSIStrategy(aq.Strategy):
     def __init__(self, window=20, num_std=2, rsi_period=14, oversold=30, overbought=70):
         self.window = window
@@ -237,12 +237,13 @@ class BollingerRSIStrategy(aq.Strategy):
         elif current_price > upper_band and rsi > self.overbought and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略六：随机指标(KDJ)超买超卖策略 (Stochastic Oscillator)
-# 核心思想：KDJ反映当前价格在近期波动区间内的相对位置，常用于识别超买超卖。
-# * 当K线从下方上穿D线，且K<20（超卖区），视为买入信号。
-# * 当K线从上方下穿D线，且K>80（超买区），视为卖出信号。
+strategies["KDJStrategy"]="""
+# 策略六：随机指标(KDJ)超买超卖策略 (Stochastic Oscillator)<br>
+# 核心思想：KDJ反映当前价格在近期波动区间内的相对位置，常用于识别超买超卖。<br>
+# * 当K线从下方上穿D线，且K<20（超卖区），视为买入信号。<br>
+# * 当K线从上方下穿D线，且K>80（超买区），视为卖出信号。<br>
 # * 此处使用经典KDJ（9,3,3）简化计算。
-
+"""
 class KDJStrategy(aq.Strategy):
     def __init__(self, n=9, m1=3, m2=3, oversold=20, overbought=80):
         self.n = n
@@ -288,12 +289,13 @@ class KDJStrategy(aq.Strategy):
         elif current_k < current_d and prev_k >= prev_d and current_k > self.overbought and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略七：成交量加权均线策略 (Volume Weighted Moving Average, VWAP)
-# 核心思想：VWAP是考虑了成交量的平均价格，反映市场的真实成交成本。
-# * 当价格从下方突破VWAP时，表明买方力量增强，可能开启上涨 -> 买入。
-# * 当价格从上方跌破VWAP时，表明卖方力量增强，可能开启下跌 -> 卖出。
+strategies["VWAPStrategy"]="""
+# 策略七：成交量加权均线策略 (Volume Weighted Moving Average, VWAP)<br>
+# 核心思想：VWAP是考虑了成交量的平均价格，反映市场的真实成交成本。<br>
+# * 当价格从下方突破VWAP时，表明买方力量增强，可能开启上涨 -> 买入。<br>
+# * 当价格从上方跌破VWAP时，表明卖方力量增强，可能开启下跌 -> 卖出。<br>
 # * 使用当日VWAP作为动态支撑/阻力，此处基于历史数据计算（通常用于日内，但可用于日线）。
-
+"""
 class VWAPStrategy(aq.Strategy):
     def __init__(self, window=20):
         self.window = window
@@ -325,12 +327,14 @@ class VWAPStrategy(aq.Strategy):
         elif current_price < vwap and prev_close >= vwap and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略八：海龟交易法则简化版 (Turtle Trading System Simplified)
-# 核心思想：基于唐奇安通道突破进行趋势跟踪，并结合ATR动态管理仓位和止损。
-# * 入场：价格突破过去20日最高价做多，突破过去10日最低价做空（反向）。
-# * 止损：以2倍ATR作为跟踪止损，价格回撤超过2倍ATR则平仓。
-# * 此版本只做多，且简化止损逻辑，使用固定ATR倍数止损。
 
+strategies["TurtleStrategy"]="""
+# 策略八：海龟交易法则简化版 (Turtle Trading System Simplified)<br>
+# 核心思想：基于唐奇安通道突破进行趋势跟踪，并结合ATR动态管理仓位和止损。<br>
+# * 入场：价格突破过去20日最高价做多，突破过去10日最低价做空（反向）。<br>
+# * 止损：以2倍ATR作为跟踪止损，价格回撤超过2倍ATR则平仓。<br>
+# * 此版本只做多，且简化止损逻辑，使用固定ATR倍数止损。<br>
+"""
 class TurtleStrategy(aq.Strategy):
     def __init__(self, entry_window=20, stop_window=10, atr_period=14, atr_multiplier=2):
         self.entry_window = entry_window
@@ -375,15 +379,16 @@ class TurtleStrategy(aq.Strategy):
                 self.sell(bar.symbol, 1000)
                 self.stop_price = None
 
-# 策略九：基于斐波那契回撤的策略 (Fibonacci Retracement Strategy)
-# 核心思想：在上升趋势中，价格往往会在回调至关键斐波那契水平（如0.382、0.5、0.618）后获得支撑并恢复上涨。
-# 本策略简化实现：
-# * 计算过去N日内的最高价（HH）和最低价（LL），作为近期波动的基准区间。
-# * 斐波那契支撑位 = HH - fib_level * (HH - LL)，通常取0.618作为回调买入区域。
-# * 当价格从高位下跌后，首次收盘价站上该支撑位，视为回调结束信号 -> 买入。
-# * 止损：若价格再次跌破该支撑位，则平仓。
+strategies["FibonacciRetracementStrategy"]="""
+# 策略九：基于斐波那契回撤的策略 (Fibonacci Retracement Strategy)<br>
+# 核心思想：在上升趋势中，价格往往会在回调至关键斐波那契水平（如0.382、0.5、0.618）后获得支撑并恢复上涨。<br>
+# 本策略简化实现：<br>
+# * 计算过去N日内的最高价（HH）和最低价（LL），作为近期波动的基准区间。<br>
+# * 斐波那契支撑位 = HH - fib_level * (HH - LL)，通常取0.618作为回调买入区域。<br>
+# * 当价格从高位下跌后，首次收盘价站上该支撑位，视为回调结束信号 -> 买入。<br>
+# * 止损：若价格再次跌破该支撑位，则平仓。<br>
 # 注意：本策略仅做多，且需确保有足够的价格波动以产生有效区间。
-
+"""
 class FibonacciRetracementStrategy(aq.Strategy):
     def __init__(self, window=20, fib_level=0.618):
         self.window = window
@@ -422,16 +427,17 @@ class FibonacciRetracementStrategy(aq.Strategy):
         elif position > 0 and current_close < support:
             self.sell(bar.symbol, 1000)
 
-# 策略十：肯特纳通道突破策略 (Keltner Channel Breakout)
-# 核心思想：肯特纳通道基于EMA和ATR构建，反映价格波动范围。
-# * 中轨：N日EMA。
-# * 上轨：中轨 + K * ATR。
-# * 下轨：中轨 - K * ATR。
-# 本策略采用趋势跟踪方式：
-# * 当价格收盘突破上轨时，视为强势上涨信号 -> 买入。
-# * 当价格收盘跌破下轨时，视为弱势下跌信号 -> 卖出（平多）。
+strategies["KeltnerChannelStrategy"]="""
+# 策略十：肯特纳通道突破策略 (Keltner Channel Breakout)<br>
+# 核心思想：肯特纳通道基于EMA和ATR构建，反映价格波动范围。<br>
+# * 中轨：N日EMA。<br>
+# * 上轨：中轨 + K * ATR。<br>
+# * 下轨：中轨 - K * ATR。<br>
+# 本策略采用趋势跟踪方式：<br>
+# * 当价格收盘突破上轨时，视为强势上涨信号 -> 买入。<br>
+# * 当价格收盘跌破下轨时，视为弱势下跌信号 -> 卖出（平多）。<br>
 # 该策略在趋势行情中表现较好，震荡市中可能产生反复信号。
-
+"""
 class KeltnerChannelStrategy(aq.Strategy):
     def __init__(self, period=20, multiplier=2, ema_span=20):
         self.period = period          # ATR计算周期
@@ -474,13 +480,14 @@ class KeltnerChannelStrategy(aq.Strategy):
         elif current_price < lower and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略十一：CDMA趋势检测策略 (Change Detection by Moving Average)
-# 核心思想：CDMA通过移动平均线检测价格变化趋势，识别趋势转折点。
-# * 计算短期和长期移动平均线的变化率，检测趋势强度变化。
-# * 当短期MA变化率上穿长期MA变化率时，表明趋势加速 -> 买入。
-# * 当短期MA变化率下穿长期MA变化率时，表明趋势减速 -> 卖出。
+strategies["CDMAStrategy"]="""
+# 策略十一：CDMA趋势检测策略 (Change Detection by Moving Average)<br>
+# 核心思想：CDMA通过移动平均线检测价格变化趋势，识别趋势转折点。<br>
+# * 计算短期和长期移动平均线的变化率，检测趋势强度变化。<br>
+# * 当短期MA变化率上穿长期MA变化率时，表明趋势加速 -> 买入。<br>
+# * 当短期MA变化率下穿长期MA变化率时，表明趋势减速 -> 卖出。<br>
 # * 结合MACD指标确认背离现象，提高信号可靠性。
-
+"""
 class CDMAStrategy(aq.Strategy):
     def __init__(self, short_window=5, long_window=20, macd_fast=12, macd_slow=26, macd_signal=9):
         self.short_window = short_window
@@ -562,21 +569,20 @@ class CDMAStrategy(aq.Strategy):
         elif sell_signal and position > 0:
             self.sell(bar.symbol, 1000)
 
-# 策略十二：尾盘买入次日冲高卖出 (Tail Buy & Next Day Sell)
-# 核心思想：
-# 在每日尾盘（如14:55）筛选出当日温和上涨、成交量放大且站上20日均线的股票买入，
-# 次日设定止盈（+3%）、止损（-2%）或尾盘强制卖出，以获取短线冲高收益。
-#
-# 选股逻辑（同时满足）：
-# 1. 当前价格 > 20日均线（趋势向上）
-# 2. 当日成交量 > 1.5倍5日均量（放量）
-# 3. 当日涨幅（相对于昨日收盘）在 1% ~ 5% 之间（避免追高和弱势）
-#
-# 卖出逻辑：
-# 1. 次日股价涨幅达到 +3% 时止盈卖出
-# 2. 次日股价跌幅达到 -2% 时止损卖出
+strategies["TailBuyStrategy"]="""
+# 策略十二：尾盘买入次日冲高卖出 (Tail Buy & Next Day Sell)<br>
+# 核心思想：<br>
+# 在每日尾盘（如14:55）筛选出当日温和上涨、成交量放大且站上20日均线的股票买入，<br>
+# 次日设定止盈（+3%）、止损（-2%）或尾盘强制卖出，以获取短线冲高收益。<br>
+# 选股逻辑（同时满足）：<br>
+# 1. 当前价格 > 20日均线（趋势向上）<br>
+# 2. 当日成交量 > 1.5倍5日均量（放量）<br>
+# 3. 当日涨幅（相对于昨日收盘）在 1% ~ 5% 之间（避免追高和弱势）<br>
+# 卖出逻辑：<br>
+# 1. 次日股价涨幅达到 +3% 时止盈卖出<br>
+# 2. 次日股价跌幅达到 -2% 时止损卖出<br>
 # 3. 次日14:50后仍未卖出则强制平仓（避免隔夜风险）
-
+"""
 import datetime
 
 class TailBuyStrategy(aq.Strategy):
@@ -899,12 +905,14 @@ class TailBuyStrategy(aq.Strategy):
 #             # 模型可能尚未初始化或训练失败
 #             pass
 
-# 策略十三：窄幅盘整后放量突破买入，跌破60日均线卖出
-# 买入条件：
-#     - 连续8天以上每日涨跌幅 ≤ 3%
-#     - 随后某一天涨幅 ≥ 5% 且成交量 ≥ 前一日成交量的2倍
-# 卖出条件：
+strategies["NarrowRangeBreakoutStrategy"]="""
+# 策略十三：窄幅盘整后放量突破买入，跌破60日均线卖出<br>
+# 买入条件：<br>
+#     - 连续8天以上每日涨跌幅 ≤ 3%<br>
+#     - 随后某一天涨幅 ≥ 5% 且成交量 ≥ 前一日成交量的2倍<br>
+# 卖出条件：<br>
 #     - 价格收盘跌破60日均线（下穿）
+"""
 from datetime import date
 class NarrowRangeBreakoutStrategy(aq.Strategy):
 
@@ -1021,8 +1029,6 @@ class LiveDemoStrategy(Strategy):
             self.log("死叉 -> 卖出平仓")
             self.close_position(bar.symbol)
 
-
-
 import requests
 import pandas as pd
 from typing import Dict, List, Optional
@@ -1039,8 +1045,7 @@ class StrategyEngine:
         # self._env_path = env_path or self._resolve_env_path()
         # self._lock = threading.RLock()
         pass
-    
-    
+
     def run_strategy(
         self,
         code: str
@@ -1144,7 +1149,11 @@ class StrategyEngine:
         # logging.info(f"best_result:\n{best_result}")
         best_name = best['name']
 
+        logging.info(strategies[best_name])
+
         # 5. 为最优策略生成报告（文件名包含策略名，避免覆盖）
+        # 创建目录（如果不存在）
+        os.makedirs("./static/images", exist_ok=True)
         report_filename = f"./static/images/{code}_{best_name}_report.html"
         dashboard_filename = f"./static/images/{code}_{best_name}_dashboard.html"
 
@@ -1273,15 +1282,42 @@ class StrategyEngine:
         logging.info(f"buy_aligned: {buy_aligned}")
         logging.info(f"sell_aligned: {sell_aligned}")
 
-        # 直接修改 mplfinance 的默认样式
-        my_style = mpf.make_mpf_style(
-            base_mpf_style='charles',  # 继承你原来用的 'charles' 风格
-            rc={
-                'font.family': 'Microsoft YaHei',  # 关键：设置中文字体
-                'axes.unicode_minus': False        # 解决负号显示问题
-            }
+        # # 直接修改 mplfinance 的默认样式
+        # my_style = mpf.make_mpf_style(
+        #     base_mpf_style='charles',  # 继承你原来用的 'charles' 风格
+        #     rc={
+        #         'font.family': 'Microsoft YaHei',  # 关键：设置中文字体
+        #         'axes.unicode_minus': False        # 解决负号显示问题
+        #     }
+        # )
+
+        # 1. 自定义K线颜色：上涨为红色，下跌为绿色
+        my_colors = mpf.make_marketcolors(
+            up='red',       # 上涨K线为红色
+            down='green',   # 下跌K线为绿色
+            edge='inherit', # K线边框颜色跟随主体（即红框红，绿框绿）
+            wick='inherit', # 影线颜色跟随主体
+            volume='inherit'# 成交量颜色跟随主体
         )
 
+        # 2. 自定义全局样式
+        my_style = mpf.make_mpf_style(
+            base_mpf_style='charles',   # 继承 'charles' 样式作为基础
+            marketcolors=my_colors,     # 应用上面自定义的K线颜色
+            rc={
+                # 解决中文乱码问题
+                'font.family': 'Microsoft YaHei',
+                'axes.unicode_minus': False,
+                # 设置黑色背景
+                'figure.facecolor': 'black',  # 整个图像外部的背景
+                'axes.facecolor': 'black' #,    # K线图内部的背景
+                # 可选：为了让文字在黑色背景下更清晰，可以把文字颜色设为白色
+                # 'text.color': 'white',
+                # 'axes.labelcolor': 'white',
+                # 'xtick.color': 'white',
+                # 'ytick.color': 'white'
+            }
+        )
         # 绘图（使用 mplfinance）
         fig, axes = mpf.plot(
             df,
@@ -1344,7 +1380,8 @@ class StrategyEngine:
                 # "numTrades": best['num_trades']
             },
             # "best_strategy": best_name,
-            "chartUrl": f"./images/{chart_filename}"  # 保留原字段
+            "chartUrl": f"./images/{chart_filename}" , # 保留原字段
+            "bestStrategyDescription":strategies[best_name]
         }
     
 

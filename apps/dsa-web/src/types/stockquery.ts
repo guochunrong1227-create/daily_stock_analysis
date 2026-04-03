@@ -12,9 +12,10 @@ export interface StockRow {
 export interface HistoryQueryItem {
   id: string;                // 唯一ID，可用 Date.now() 拼上随机数
   type: 'fundamental' | 'sentiment' | 'combined';
-  queryParams: {
-    stockCode?: string;       // 查询时输入的股票代码（可为空，代表全市场）
-  };
+  downloadURL: string;
+  // queryParams: {
+  //   stockCode?: string;       // 查询时输入的股票代码（可为空，代表全市场）
+  // };
   resultCount: string;
   createAt: string;          // ISO 字符串
   data: StockRow[];           // 当前记录对应的完整网格数据

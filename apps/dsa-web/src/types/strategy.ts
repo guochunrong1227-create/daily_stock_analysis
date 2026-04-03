@@ -22,4 +22,5 @@ export interface StrategyResultResponse {
     summary: string;
     metrics: Metrics;
     chartUrl: string; // 假设后端返回图片URL
+    bestStrategyDescription:string;
 }

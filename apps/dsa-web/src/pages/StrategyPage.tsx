@@ -279,45 +279,76 @@ const StrategyPage: React.FC = () => {
             <Card variant="gradient" padding="md">
               <h3 className="label-uppercase mb-3">执行结果摘要</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted mb-1">总回报</p>
-                  <p className={`text-xl font-mono font-semibold ${result.metrics.totalReturn >= 0.0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    {result.metrics.totalReturn}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted mb-1">胜率</p>
-                  <p className="text-xl font-mono font-semibold text-cyan">
-                    {result.metrics.winRate.toFixed(1)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted mb-1">最大回撤</p>
-                  <p className="text-xl font-mono font-semibold text-amber-400">
-                    {result.metrics.maxDrawdown.toFixed(2)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted mb-1">夏普比率</p>
-                  <p className="text-xl font-mono font-semibold text-white">
-                    {result.metrics.sharpeRatio.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4 p-2 bg-elevated/50 rounded border border-white/5">
-                {/* <p className="text-sm text-white">{result.summary}</p> */}
-                  {result.summary.split(',').map((url, index) => (
-                    <div key={index} className="text-xl text-white">
-                      <a 
-                        href={url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="underline hover:text-blue-400 break-all"
-                      >
-                        {url}
-                      </a>
+                {/* 左侧列 */}
+                <div className="flex flex-col gap-4">
+                  {/* 上半部分：两个指标组（原第一列+第二列）并列 */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* 原第一列：总回报 + 胜率 */}
+                    <div>
+                      <div>
+                        <p className="text-xs text-muted mb-1">总回报</p>
+                        <p className={`text-base font-mono font-semibold ${result.metrics.totalReturn >= 0.0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {result.metrics.totalReturn}
+                        </p>
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-xs text-muted mb-1">胜率</p>
+                        <p className="text-base font-mono font-semibold text-cyan">
+                          {result.metrics.winRate.toFixed(1)}%
+                        </p>
+                      </div>
                     </div>
-                  ))}
+
+                    {/* 原第二列：最大回撤 + 夏普比率 */}
+                    <div>
+                      <div>
+                        <p className="text-xs text-muted mb-1">最大回撤</p>
+                        <p className="text-base font-mono font-semibold text-amber-400">
+                          {result.metrics.maxDrawdown.toFixed(2)}%
+                        </p>
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-xs text-muted mb-1">夏普比率</p>
+                        <p className="text-base font-mono font-semibold text-white">
+                          {result.metrics.sharpeRatio.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* 下半部分：summary 链接列表 */}
+                  <div className="p-2 bg-elevated/50 rounded border border-white/5">
+                    {(() => {
+                      const urls = result.summary.split(',');
+                      return (
+                        <>
+                          {urls[0] && (
+                            <div className="text-base text-white">
+                              <a href={urls[0]} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">
+                                仪表盘
+                              </a>
+                            </div>
+                          )}
+                          {urls[1] && (
+                            <div className="text-base text-white mt-1">
+                              <a href={urls[1]} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">
+                                报告
+                              </a>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* 右侧列：历史最佳策略描述 */}
+                <div>
+                  <p className="text-xs text-muted mb-1">历史最佳操作策略</p>
+                  <p
+                      className="text-base font-mono text-white break-words"
+                      dangerouslySetInnerHTML={{ __html: result.bestStrategyDescription || '双均线策略' }}
+                    />
+                </div>
               </div>
             </Card>
 

@@ -139,7 +139,8 @@ class StrategyService:
                 "sharpeRatio":result.metrics_df.loc['sharpe_ratio','value'],
                 "winRate":result.metrics_df.loc['win_rate','value']
             },
-            "chartUrl": f"./images/demo.png"
+            "chartUrl": f"./images/demo.png",
+            "bestStrategyDescription":"双均线",
         }
     #     // const responseData:StrategyResultResponse = {
     # //     'code': '000001',

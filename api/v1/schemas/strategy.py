@@ -27,5 +27,6 @@ class StrategyRunResponse(BaseModel):
     summary: str
     metrics: MetricsBase
     chartUrl: str
+    bestStrategyDescription:str
 
 
