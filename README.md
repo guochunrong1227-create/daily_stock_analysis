@@ -451,15 +451,13 @@ npm run build
 ```
 
 ## 📄 License
-[MIT License](LICENSE) © 2026 ZhuLinsen
+[MIT License](LICENSE) © 2026 GuoChunRong Updated
 
-如果你在项目中使用或基于本项目进行二次开发，
-非常欢迎在 README 或文档中注明来源并附上本仓库链接。
-这将有助于项目的持续维护和社区发展。
+如果你在项目中使用或基于[Zhulinsen](https://github.com/ZhuLinsen/daily_stock_analysis)进行二次开发。
 
 ## 📬 联系与合作
-- GitHub Issues：[提交 Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
-- 合作邮箱：zhuls345@gmail.com
+- GitHub Issues：[提交 Issue](https://github.com/guochunrong1227-create/daily_stock_analysis/issues)
+- 合作邮箱：guochunrong1227@gmail.com
 
 ## ⭐ Star History
 **如果觉得有用，请给个 ⭐ Star 支持一下！**
