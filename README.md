@@ -453,7 +453,7 @@ npm run build
 ## 📄 License
 [MIT License](LICENSE) © 2026 GuoChunRong Updated
 
-如果你在项目中使用或基于[Zhulinsen](https://github.com/ZhuLinsen/daily_stock_analysis)进行二次开发。
+如果项目是基于[Zhulinsen](https://github.com/ZhuLinsen/daily_stock_analysis)进行二次开发。
 
 ## 📬 联系与合作
 - GitHub Issues：[提交 Issue](https://github.com/guochunrong1227-create/daily_stock_analysis/issues)
