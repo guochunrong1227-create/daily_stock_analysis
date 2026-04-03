@@ -10,6 +10,18 @@ API v1 Endpoints 模块初始化
 
 from api.v1.endpoints import health, analysis, history, stocks, backtest, system_config,agent,auth,usage,strategy, stockquery
 
+from api.v1.endpoints import (
+    health,
+    analysis,
+    history,
+    stocks,
+    backtest,
+    system_config,
+    auth,
+    agent,
+    usage,
+    portfolio,
+)
 __all__ = [
     "health",
     "analysis",
@@ -20,6 +32,4 @@ __all__ = [
     "auth",
     "agent",
     "usage",
-    "strategy",
-    "stockquery",
 ]
